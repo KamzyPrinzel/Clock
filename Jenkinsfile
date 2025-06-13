@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker build -t clock:1 .'
-                    sh 'docker run -d -p 4567:4567 clock:1'  
+                    sh 'docker run -d -p 5555:5555 clock:1'  
                 }
             }
         }
