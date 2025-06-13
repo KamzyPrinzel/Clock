@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'prinzkay/clock:1'
+    }
+
     stages {
 
         stage('Clear Working Directory') {
@@ -9,40 +13,33 @@ pipeline {
             }
         }
 
-        stage('Check out of GitHub repo') {
+        stage('Check out GitHub Repo') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/KamzyPrinzel/Clock.git'
+                git branch: 'main', url: 'https://github.com/KamzyPrinzel/Clock.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t prinzkay/clock:1 .'  
-                }
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Scan Docker Image with Trivy') {
             steps {
-                script {
-                    sh 'trivy image clock:1 > clock-1-result.txt'
-                }
+                sh 'trivy image $IMAGE_NAME > clock-1-result.txt'
             }
         }
 
-        stage('Push to Docker hub'){
+        stage('Push to Docker Hub') {
             steps {
-                script{
-                    with Credentials([string(credentialsId: 'id', variable: 'cred')]){
-                    sh 'docker login -u prinzkay -p ${cred}'    
-                    }
-                    sh 'docker push prinzkay/clock:1'
-
+                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u prinzkay --password-stdin
+                        docker push $IMAGE_NAME
+                    '''
                 }
             }
         }
     }
-
 }
