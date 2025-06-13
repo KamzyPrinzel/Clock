@@ -7,6 +7,6 @@ COPY . /usr/share/nginx/html
 
 RUN apk update && apk upgrade libxml2
 
-EXPOSE 5555
+EXPOSE 80
 
 CMD [ "nginx", "-g", "daemon off;" ]
